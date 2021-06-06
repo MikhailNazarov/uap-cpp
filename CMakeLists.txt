@@ -20,8 +20,8 @@ set(LIB_SOURCES
         internal/SnippetIndex.cpp)
 
 find_package(yaml-cpp REQUIRED)
-include_directories(${YAML_CPP_INCLUDE_DIR})
-
+include_directories(${YAML_CPP_INCLUDE_DIR} /usr/local/include)
+link_directories(/usr/local/lib)
 find_package(re2)
 
 # this is the "object library" target: compiles the sources only once
@@ -36,6 +36,7 @@ set_target_properties(uap-cpp-static PROPERTIES OUTPUT_NAME uaparser_cpp)
 
 add_library(uap-cpp-shared SHARED $<TARGET_OBJECTS:objlib>)
 set_target_properties(uap-cpp-shared PROPERTIES OUTPUT_NAME uaparser_cpp)
+target_link_libraries(uap-cpp-shared re2 yaml-cpp)
 
 
 
