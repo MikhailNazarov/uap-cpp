@@ -1,7 +1,7 @@
 #pragma once
 
 #include "StringView.h"
-
+#include <unordered_set>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -20,7 +20,7 @@ namespace uap_cpp {
 class SnippetIndex {
  public:
   typedef uint32_t SnippetId;
-  typedef std::set<SnippetId> SnippetSet;
+  typedef std::unordered_set<SnippetId> SnippetSet;
 
   SnippetSet registerSnippets(const StringView& expression);
   SnippetSet getSnippets(const StringView& text) const;

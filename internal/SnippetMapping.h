@@ -58,7 +58,10 @@ class SnippetMapping {
                                  const TrieNode& node,
                                  Result& expressions) const {
     if (!node.expressions_.empty()) {
-      expressions.insert(node.expressions_.begin(), node.expressions_.end());
+      for(auto i = node.expressions_.begin();i!=node.expressions_.end(); ++i){
+        expressions.push_back(*i);
+      }
+      //expressions.insert(node.expressions_.begin(), node.expressions_.end());
     }
 
     while (it != end) {

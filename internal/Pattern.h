@@ -14,11 +14,11 @@ class Match;
 class Pattern {
  public:
   Pattern();
-  Pattern(const std::string&, bool case_sensitive = true);
+  explicit Pattern(std::string_view, bool case_sensitive = true);
 
-  void assign(const std::string&, bool case_sensitive = true);
+  void assign(std::string_view, bool case_sensitive = true);
 
-  bool match(const std::string&, Match&) const;
+  bool match(std::string_view, Match&) const;
 
  private:
   std::unique_ptr<re2::RE2> regex_;
@@ -32,8 +32,8 @@ class Match {
  public:
   Match();
 
-  size_t size() const;
-  const std::string& get(size_t index) const;
+  [[nodiscard]] size_t size() const;
+  [[nodiscard]] const std::string& get(size_t index) const;
 
  private:
   friend class Pattern;

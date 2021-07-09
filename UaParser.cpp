@@ -123,8 +123,8 @@ void fill_agent_store(const YAML::Node& node,
 }
 
 struct UAStore {
-  explicit UAStore(const std::string& regexes_file_path) {
-    auto regexes = YAML::LoadFile(regexes_file_path);
+  explicit UAStore(std::string_view regexes_file_path) {
+    auto regexes = YAML::LoadFile(std::string(regexes_file_path));
 
     const auto& user_agent_parsers = regexes["user_agent_parsers"];
     for (const auto& user_agent : user_agent_parsers) {
@@ -174,14 +174,18 @@ struct UAStore {
 // HELPERS //
 /////////////
 
-uap_cpp::Device parse_device_impl(const std::string& ua,
+uap_cpp::Device parse_device_impl(std::string_view ua,
                                   const UAStore* ua_store) {
   uap_cpp::Device device;
 
   auto snippets = ua_store->deviceSnippetIndex.getSnippets(ua);
 
-  std::set<const DeviceStore*, GenericStoreComparator> regexps;
+  std::vector<const DeviceStore*> regexps;
+  //GenericStoreComparator comparator;
+
+  //std::set<const DeviceStore*, GenericStoreComparator> regexps;
   ua_store->deviceMapping.getExpressions(snippets, regexps);
+ // std::sort(regexps.begin(), regexps.end(),comparator );
 
   for (const auto& entry : regexps) {
     const auto& d = *entry;
@@ -246,15 +250,16 @@ void fill_agent(AGENT& agent,
   }
 }
 
-uap_cpp::Agent parse_browser_impl(const std::string& ua,
+uap_cpp::Agent parse_browser_impl(std::string_view ua,
                                   const UAStore* ua_store) {
   uap_cpp::Agent browser;
 
   auto snippets = ua_store->browserSnippetIndex.getSnippets(ua);
-
-  std::set<const AgentStore*, GenericStoreComparator> regexps;
+  std::vector<const AgentStore*> regexps;
+  //std::set<const AgentStore*, GenericStoreComparator> regexps;
   ua_store->browserMapping.getExpressions(snippets, regexps);
-
+  //GenericStoreComparator comparator;
+ // std::sort(regexps.begin(), regexps.end(),comparator );
   for (const auto& entry : regexps) {
     const auto& b = *entry;
     thread_local uap_cpp::Match m;
@@ -267,14 +272,16 @@ uap_cpp::Agent parse_browser_impl(const std::string& ua,
   return browser;
 }
 
-uap_cpp::Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {
+uap_cpp::Agent parse_os_impl(std::string_view ua, const UAStore* ua_store) {
   uap_cpp::Agent os;
 
   auto snippets = ua_store->osSnippetIndex.getSnippets(ua);
 
-  std::set<const AgentStore*, GenericStoreComparator> regexps;
+  std::vector<const AgentStore*> regexps;
+  //std::set<const AgentStore*, GenericStoreComparator> regexps;
+  //GenericStoreComparator comparator;
   ua_store->osMapping.getExpressions(snippets, regexps);
-
+  //std::sort(regexps.begin(), regexps.end(),comparator );
   for (const auto& entry : regexps) {
     const auto& o = *entry;
     thread_local uap_cpp::Match m;
@@ -291,7 +298,7 @@ uap_cpp::Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {
 
 namespace uap_cpp {
 
-UserAgentParser::UserAgentParser(const std::string& regexes_file_path)
+UserAgentParser::UserAgentParser(std::string_view regexes_file_path)
     : regexes_file_path_{regexes_file_path} {
   ua_store_ = new UAStore(regexes_file_path);
 }
@@ -300,7 +307,7 @@ UserAgentParser::~UserAgentParser() {
   delete static_cast<const UAStore*>(ua_store_);
 }
 
-UserAgent UserAgentParser::parse(const std::string& ua) const noexcept {
+UserAgent UserAgentParser::parse(std::string_view ua) const noexcept {
   const auto ua_store = static_cast<const UAStore*>(ua_store_);
 
   try {
@@ -313,7 +320,7 @@ UserAgent UserAgentParser::parse(const std::string& ua) const noexcept {
   }
 }
 
-Device UserAgentParser::parse_device(const std::string& ua) const noexcept {
+Device UserAgentParser::parse_device(std::string_view ua) const noexcept {
   try {
     return parse_device_impl(ua, static_cast<const UAStore*>(ua_store_));
   } catch (...) {
@@ -321,7 +328,7 @@ Device UserAgentParser::parse_device(const std::string& ua) const noexcept {
   }
 }
 
-Agent UserAgentParser::parse_os(const std::string& ua) const noexcept {
+Agent UserAgentParser::parse_os(std::string_view ua) const noexcept {
   try {
     return parse_os_impl(ua, static_cast<const UAStore*>(ua_store_));
   } catch (...) {
@@ -329,7 +336,7 @@ Agent UserAgentParser::parse_os(const std::string& ua) const noexcept {
   }
 }
 
-Agent UserAgentParser::parse_browser(const std::string& ua) const noexcept {
+Agent UserAgentParser::parse_browser(std::string_view ua) const noexcept {
   try {
     return parse_browser_impl(ua, static_cast<const UAStore*>(ua_store_));
   } catch (...) {
@@ -337,7 +344,7 @@ Agent UserAgentParser::parse_browser(const std::string& ua) const noexcept {
   }
 }
 
-DeviceType UserAgentParser::device_type(const std::string& ua) noexcept {
+DeviceType UserAgentParser::device_type(std::string_view ua) noexcept {
   // https://gist.github.com/dalethedeveloper/1503252/931cc8b613aaa930ef92a4027916e6687d07feac
   static const uap_cpp::Pattern rx_mob(
       "Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-"

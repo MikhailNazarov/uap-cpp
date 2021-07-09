@@ -47,3 +47,6 @@
 nbproject
 build
 UaParserTest
+.idea
+cmake-build-debug
+cmake-build-release

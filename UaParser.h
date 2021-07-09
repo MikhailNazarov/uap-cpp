@@ -45,15 +45,15 @@ enum class DeviceType { kUnknown = 0, kDesktop, kMobile, kTablet };
 
 class UserAgentParser {
  public:
-  explicit UserAgentParser(const std::string& regexes_file_path);
+  explicit UserAgentParser(std::string_view regexes_file_path);
 
-  UserAgent parse(const std::string&) const noexcept;
+  UserAgent parse(std::string_view) const noexcept;
 
-  Device parse_device(const std::string&) const noexcept;
-  Agent parse_os(const std::string&) const noexcept;
-  Agent parse_browser(const std::string&) const noexcept;
+  Device parse_device(std::string_view) const noexcept;
+  Agent parse_os(std::string_view) const noexcept;
+  Agent parse_browser(std::string_view) const noexcept;
 
-  static DeviceType device_type(const std::string&) noexcept;
+  static DeviceType device_type(std::string_view) noexcept;
 
   ~UserAgentParser();
 

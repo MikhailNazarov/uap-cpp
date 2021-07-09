@@ -6,14 +6,19 @@ namespace uap_cpp {
 
 Pattern::Pattern() : groupCount_(0) {}
 
-Pattern::Pattern(const std::string& pattern, bool case_sensitive)
+Pattern::Pattern(std::string_view pattern, bool case_sensitive)
     : groupCount_(0) {
   assign(pattern, case_sensitive);
 }
 
-void Pattern::assign(const std::string& pattern, bool case_sensitive) {
+void Pattern::assign(std::string_view pattern, bool case_sensitive) {
   // Add parentheses around expression for capture group 0
-  std::string pattern_with_zero_group = "(" + pattern + ")";
+  std::string pattern_with_zero_group;
+  pattern_with_zero_group.resize(pattern.size()+2);
+  pattern_with_zero_group[0]='(';
+  pattern_with_zero_group[pattern_with_zero_group.size()-1]=')';
+  memcpy(pattern_with_zero_group.data()+1, pattern.data(),pattern.size());
+
 
   re2::RE2::Options options;
   options.set_case_sensitive(case_sensitive);
@@ -26,8 +31,8 @@ void Pattern::assign(const std::string& pattern, bool case_sensitive) {
   }
 }
 
-bool Pattern::match(const std::string& s, Match& m) const {
-  if (regex_ && re2::RE2::PartialMatchN(s, *regex_, m.argPtrs_, groupCount_)) {
+bool Pattern::match(std::string_view s, Match& m) const {
+  if (regex_ && re2::RE2::PartialMatchN(s.data(), *regex_, m.argPtrs_, groupCount_)) {
     m.count_ = groupCount_;
     return true;
   }
